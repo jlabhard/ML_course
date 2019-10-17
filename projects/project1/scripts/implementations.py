@@ -27,6 +27,21 @@ def compute_gradient(y, tx, w):
     # return the gradient
     return - tx.T.dot(e) / len(y)
 
+def compute_loss(y, tx, w):
+    """Calculate the loss.
+
+    You can calculate the loss using mse or mae.
+    """
+    e = y - np.sum(tx * w, axis=1)
+    e2 = e * e
+
+    return np.sum(e2) / (2 * len(y))
+
+def compute_gradient(y, tx, w):
+    """Compute the gradient."""
+    e = y - np.sum(tx*w, axis = 1)
+    return - tx.T.dot(e) / len(y)
+
 def least_squares_GD(y, tx, initial_w, max_iters, gamma) :
     """Gradient descent algorithm."""
     # Define parameters to store w and loss
@@ -44,7 +59,6 @@ def least_squares_GD(y, tx, initial_w, max_iters, gamma) :
             bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
 
     return w, loss
-
 
 def least_squares_SGD(y, tx, initial_w, max_iters, gamma) :
     # TODO: Implementation
