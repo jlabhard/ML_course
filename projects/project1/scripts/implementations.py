@@ -65,12 +65,21 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma) :
     return NotImplementedError
 
 def least_squares(y, tx) :
-    # TODO: Implementation
-    return NotImplementedError
+    """calculate the least squares solution."""
+    w = np.linalg.solve(tx.T@tx, tx.T@y)
+    loss = compute_loss_mse(y, tx, w)
+    return w, loss
+
+def compute_rmse(y, tx, w):
+    return np.sqrt(2*compute_loss_mse(y, tx, w))
 
 def ridge_regression(y, tx, lambda_) :
-    # TODO: Implementation
-    return NotImplementedError
+    """implement ridge regression."""
+    aI = 2 * tx.shape[0] * lambda_ * np.identity(tx.shape[1])
+
+    w = np.linalg.solve(tx.T.dot(tx) + aI, tx.T.dot(y))
+    loss = compute_rmse(y, tx, w)
+    return w, loss
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma) :
     # TODO: Implementation
