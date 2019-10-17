@@ -10,9 +10,24 @@ def least_squares_GD(y, tx, initial_w, max_iters, gamma) :
     # TODO: Implementation
     return NotImplementedError
 
+def compute_loss(y, tx, w):
+    """Calculate the loss MSE """
+    e = y - tx@w
+    return (e.T@e)/(2*len(y))
+
+def compute_stoch_gradient(y, tx, w):
+    """Compute a stochastic gradient from just few examples n and their corresponding y_n labels."""
+    e = y - tx@w
+    return (-1/len(y))*(tx.T@e)
+
 def least_squares_SGD(y, tx, initial_w, max_iters, gamma) :
-    # TODO: Implementation
-    return NotImplementedError
+    w = initial_w
+    for n_iter in range(max_iters):
+        for batch_y, batch_tx in batch_iter(y, tx, batch_size):
+            grad = compute_stoch_gradient(batch_y, batch_tx, w)
+            loss = compute_loss(y, tx, w)
+            w = w - gamma*grad
+    return w, loss
 
 def least_squares(y, tx) :
     # TODO: Implementation
