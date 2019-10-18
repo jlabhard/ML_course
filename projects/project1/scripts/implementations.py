@@ -52,15 +52,13 @@ def least_squares(y, tx) :
     loss = compute_mse_loss(y, tx, w)
     return w, loss
 
-def compute_rmse(y, tx, w):
-    return np.sqrt(2*compute_mse_loss(y, tx, w))
 
 """implement ridge regression."""
 def ridge_regression(y, tx, lambda_) :
     aI = 2 * tx.shape[0] * lambda_ * np.identity(tx.shape[1])
 
     w = np.linalg.solve(tx.T.dot(tx) + aI, tx.T.dot(y))
-    loss = compute_rmse(y, tx, w)
+    loss = compute_mse_loss(y, tx, w)
     return w, loss
 
 def sigmoid(t):
