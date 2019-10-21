@@ -15,8 +15,8 @@ def compute_rmse(y, tx, w):
 ''' Compute the gradient of the mse loss'''
 def compute_least_square_gradient(y, tx, w):
     # error
-     e = y - tx @ w
-     # return the gradient
+    e = y - tx @ w
+    # return the gradient
     return (-tx.T @ e)/len(y)
 
 """Gradient descent algorithm using mse loss """
@@ -66,7 +66,7 @@ def sigmoid(t):
 
 def compute_logistic_loss(y, tx, w):
     """compute the cost by negative log likelihood."""
-    return np.sum(np.log(1 + np.exp(tx @ w))-y*tx @ w)
+    return np.sum(np.log(1 + np.exp(tx @ w))-y * (tx @ w))
 
 def compute_logistic_gradient(y, tx, w):
     """compute the gradient of loss."""
