@@ -66,10 +66,12 @@ def sigmoid(t):
 
 def compute_logistic_loss(y, tx, w):
     """compute the cost by negative log likelihood."""
-    return np.sum(np.log(1 + np.exp(tx @ w))-y * (tx @ w))
+    y = (y+1)/2
+    return np.sum(np.log(1 + np.exp(tx @ w)) - y * (tx @ w))
 
 def compute_logistic_gradient(y, tx, w):
     """compute the gradient of loss."""
+    y = (y+1)/2
     return tx.T @ (sigmoid(tx @ w) - y)
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma) :
@@ -86,8 +88,9 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma) :
 def penalized_logistic_regression(y, tx, w, lambda_):
     """return the loss and gradient."""
     num_samples = y.shape[0]
-    loss = compute_logistic_loss(y, tx, w) + (lambda_/2) * w.T @ w
+    loss = compute_logistic_loss(y, tx, w) + (lambda_/2) * (w.T @ w)
     gradient = compute_logistic_gradient(y, tx, w) + lambda_ * w
+    print("gradient : ", compute_logistic_gradient(y, tx, w))
     return loss, gradient
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma) :
@@ -99,3 +102,20 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma) :
         loss, gradient = penalized_logistic_regression(y, tx, w, lambda_)
         w -= gamma * gradient
     return w, loss
+
+def split_data(x, y, ratio, seed):
+    """split the dataset based on the split ratio."""
+    # set seed
+    np.random.seed(seed)
+    # ***************************************************
+    # INSERT YOUR CODE HERE
+    # split the data based on the given ratio: TODO
+    # ***************************************************
+    temp = list(zip(x,y))
+    np.random.shuffle(temp)
+    x,y = zip(*temp)
+    threshold = int(len(x)*ratio)
+    x_split = np.split(x, [threshold, len(x)])
+    y_split = np.split(y, [threshold, len(y)])
+    
+    return x_split[0], x_split[1], y_split[0], y_split[1]
