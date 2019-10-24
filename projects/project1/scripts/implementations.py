@@ -2,6 +2,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+def compute_rmse(y, tx, w):
+    return np.sqrt(2*compute_loss_mse(y, tx, w))
+
 ''' Calculate the loss using MSE'''
 def compute_mse(y, tx, w):
     # error
@@ -62,7 +65,9 @@ def ridge_regression(y, tx, lambda_) :
 
 def sigmoid(t):
     """apply sigmoid function on t."""
-    return np.exp(t)/(1+np.exp(t))
+    return np.where(t >= 0, 
+                    1 / (1 + np.exp(-t)), 
+                    np.exp(t) / (1 + np.exp(t)))
 
 def compute_logistic_loss(y, tx, w):
     """compute the cost by negative log likelihood."""
@@ -119,3 +124,42 @@ def split_data(x, y, ratio, seed):
     y_split = np.split(y, [threshold, len(y)])
     
     return x_split[0], x_split[1], y_split[0], y_split[1]
+
+def build_poly(x, degree):
+    """polynomial basis functions for input data x, for j=0 up to j=degree."""
+    poly = np.zeros((degree+1, len(x)))
+    for deg in range(degree+1):
+        y = np.power(x,deg)
+        poly[deg] = y
+    return poly.T
+
+def plot_train_test(train_errors, test_errors, x_axis, title_):
+    """
+    train_errors, test_errors should be list (of the same size) the respective train error and test error ,
+    * train_errors[0] = RMSE of a ridge regression on the train set
+    * test_errors[0] = RMSE of the parameter found by ridge regression applied on the test set
+    
+    degree is just used for the title of the plot.
+    """
+    plt.semilogx(x_axis, train_errors, color='b', marker='*', label="Train error")
+    plt.semilogx(x_axis, test_errors, color='r', marker='*', label="Test error")
+    plt.xlabel("degree")
+    plt.ylabel("RMSE")
+    plt.title(title_)
+    leg = plt.legend(loc=1, shadow=True)
+    leg.draw_frame(False)
+    
+    
+def build_poly(x, degree):
+    """polynomial basis functions for input data x, for j=0 up to j=degree."""
+    phi = np.array([x,]*(degree+1)).transpose()
+    powers = np.tile(range(degree+1), (len(x), 1))
+    return phi**powers
+
+def build_multi_poly(X, degree) :
+    poly = np.ones(X.shape[0])
+    for i in range(X.shape[1]) :
+        feature = X[:, i]
+        feature_poly = build_poly(feature, degree)[:, 1:]
+        poly = np.c_[poly, feature_poly]
+    return poly
