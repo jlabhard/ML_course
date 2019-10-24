@@ -148,6 +148,7 @@ def plot_train_test(train_errors, test_errors, x_axis, title_):
     plt.title(title_)
     leg = plt.legend(loc=1, shadow=True)
     leg.draw_frame(False)
+    plt.show()
     
     
 def build_poly(x, degree):
