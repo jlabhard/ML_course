@@ -133,7 +133,7 @@ def build_poly(x, degree):
         poly[deg] = y
     return poly.T
 
-def plot_train_test(train_errors, test_errors, x_axis, title_):
+def plot_train_test(train_accuracy, test_accuracy, x_axis, title_, p, log = False):
     """
     train_errors, test_errors should be list (of the same size) the respective train error and test error ,
     * train_errors[0] = RMSE of a ridge regression on the train set
@@ -141,10 +141,14 @@ def plot_train_test(train_errors, test_errors, x_axis, title_):
     
     degree is just used for the title of the plot.
     """
-    plt.semilogx(x_axis, train_errors, color='b', marker='*', label="Train error")
-    plt.semilogx(x_axis, test_errors, color='r', marker='*', label="Test error")
-    plt.xlabel("degree")
-    plt.ylabel("RMSE")
+    if log :
+        plt.semilogx(x_axis, train_accuracy, color='b', marker='*', label="Train accuracy")
+        plt.semilogx(x_axis, test_accuracy, color='r', marker='*', label="Test accuracy")
+    else :
+        plt.plot(x_axis, train_accuracy, color='b', marker='*', label="Train accuracy")
+        plt.plot(x_axis, test_accuracy, color='r', marker='*', label="Test accuracy")
+    plt.xlabel(p)
+    plt.ylabel("Accuracy")
     plt.title(title_)
     leg = plt.legend(loc=1, shadow=True)
     leg.draw_frame(False)
@@ -164,3 +168,74 @@ def build_multi_poly(X, degree) :
         feature_poly = build_poly(feature, degree)[:, 1:]
         poly = np.c_[poly, feature_poly]
     return poly
+
+def partition(number):
+    answer = []
+    answer.append((number, ))
+    answer.append((0 , number))
+    for x in range(1, number):
+        for y in partition(number - x):
+            answer.append((x,  ) + y)
+    answer = [ans for ans in answer if len(ans) <3] 
+    return answer
+
+def correct_partition(arr):
+    return [(ans[0], 0) if len(ans) == 1 else ans for ans in arr ] 
+
+def other_partition(arr):
+    arr = correct_partition(arr)
+    return [ans for ans in arr if (ans[0] == 0 or ans[1] == 0) ] 
+
+
+# def build_augmented_features(feature_1, feature_2, degree=2, cross= True):
+#     degree_array = []
+#     if cross:
+#         for i in range(degree):
+#             degree_array.append(correct_partition(partition(i+1)))
+#     else:
+#         for i in range(degree):
+#             degree_array.append(other_partition(partition(i+1)))
+            
+#     degree_array = [item for sublist in degree_array for item in sublist]
+#     augmented_array = np.zeros((feature_1.shape[0], len(degree_array)))
+
+#     for i, tuple_ in enumerate(degree_array):
+#         augmented_array[:, i] = (feature_1 * tuple_[0]) * (feature_2 * tuple_[1])
+
+#     return augmented_array
+
+def build_augmented_features(feature_1, feature_2, degree=2, cross= True):
+    degree_array = []
+    if cross:
+        for i in range(degree):
+            degree_array.append(correct_partition(partition(i+1)))
+    else:
+        for i in range(degree):
+            degree_array.append(other_partition(partition(i+1)))
+            
+    degree_array = [item for sublist in degree_array for item in sublist]
+    
+    augmented_feat_1 = np.tile(feature_1, (len(degree_array), 1)).T
+    augmented_feat_2 = np.tile(feature_2, (len(degree_array), 1)).T
+    degree_feat_1 = np.tile(np.array([item[0] for item in degree_array]), (feature_1.shape[0], 1))
+    degree_feat_2 = np.tile(np.array([item[1] for item in degree_array]), (feature_2.shape[0], 1))
+
+    augmented_array = (augmented_feat_1 * degree_feat_1) * (augmented_feat_2 * degree_feat_2)
+    return augmented_array
+
+def build_all(columns, dataset, degree, cross = True):
+    augs = []
+    for pair in get_combinations(columns):
+        aug = build_augmented_features(dataset[:, pair[0]], dataset[:, pair[1]], degree, cross)
+        augs.append(aug)
+    tX_standardized_af_aug = np.concatenate(augs, axis=1)
+    tX_standardized_af_aug = np.c_[tX_standardized_af_aug, np.ones((dataset.shape[0], 1))]
+    return np.unique(tX_standardized_af_aug, axis=1)
+
+def get_combinations(arr):
+    my_combinations = []
+    for i in range(len(arr)):
+        for j in range(len(arr)-1-i):
+            my_combinations.append((arr[i], arr[i+j+1]))
+    return my_combinations
+
