@@ -170,7 +170,6 @@ def build_multi_poly(X, degree) :
 def partition(number):
     answer = []
     answer.append((number, ))
-    answer.append((0 , number))
     for x in range(1, number):
         for y in partition(number - x):
             answer.append((x,  ) + y)
@@ -178,7 +177,7 @@ def partition(number):
     return answer
 
 def correct_partition(arr):
-    return [(ans[0], 0) if len(ans) == 1 else ans for ans in arr ] 
+    return [ans for ans in arr if len(ans) != 1  ] 
 
 def other_partition(arr):
     arr = correct_partition(arr)
@@ -221,14 +220,14 @@ def build_augmented_features(feature_1, feature_2, degree=2, cross= True):
     augmented_array = (augmented_feat_1 * degree_feat_1) * (augmented_feat_2 * degree_feat_2)
     return augmented_array
 
-def build_all(columns, dataset, degree, cross = True):
+def build_all(dataset, degree, cross = True):
     augs = []
-    for pair in get_combinations(columns):
+    for pair in get_combinations(np.arange(dataset.shape[1])):
         aug = build_augmented_features(dataset[:, pair[0]], dataset[:, pair[1]], degree, cross)
         augs.append(aug)
     tX_standardized_af_aug = np.concatenate(augs, axis=1)
-    tX_standardized_af_aug = np.c_[tX_standardized_af_aug, np.ones((dataset.shape[0], 1))]
-    return np.unique(tX_standardized_af_aug, axis=1)
+    tX_standardized_af_aug = np.c_[build_multi_poly(dataset, degree), tX_standardized_af_aug]
+    return tX_standardized_af_aug
 
 def get_combinations(arr):
     my_combinations = []
