@@ -3,7 +3,7 @@
 Deniz Ira, Stanislas Jouven, Jonathan Labhard
 
 ## Description
-This folder contains all the files included in our submission of project 1. This is meant to be the "scripts" folder of the project. For the executions to be functional, all files present here should be placed in the "scripts" folder of a copy of the full project files. The execution of the different files also requires an Python 3.7 environment with numpy and matplotlib installed.
+This folder contains all the files included in our submission of project 1. This is meant to be the "scripts" folder of the project. For the executions to be functional, all files present here should be placed in the "scripts" folder of the full project files. The execution of the different files also requires an Python 3.7 environment with numpy and matplotlib installed.
 ### Files description
 #### run.py 
 Run this file to obtain the submission_file we used in the AICrowd competition. 
