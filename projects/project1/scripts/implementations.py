@@ -48,7 +48,7 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma) :
 
 """calculate the least squares solution using normal equation """
 def least_squares(y, tx) :
-    w = np.linalg.solve(tx.T @ tx, tx.T @ y)
+    w = np.linalg.lstsq(tx.T @ tx, tx.T @ y, rcond = -1)[0]
     loss = compute_mse(y, tx, w)
     return w, loss
 
@@ -56,10 +56,19 @@ def least_squares(y, tx) :
 """implement ridge regression."""
 def ridge_regression(y, tx, lambda_) :
     aI = 2 * tx.shape[0] * lambda_ * np.identity(tx.shape[1])
-
-    w = np.linalg.solve(tx.T @ tx + aI, tx.T @ y)
+    left = (tx.T @ tx + aI)
+    right = tx.T @ y
+    w = np.linalg.lstsq(left, right, rcond = -1 )[0]
     loss = compute_mse(y, tx, w)
     return w, loss
+
+#def ridge_regression(y, tx, lambda_) :
+#    aI = 2 * tx.shape[0] * lambda_ * np.identity(tx.shape[1])
+#    left = (tx.T @ tx + aI)
+#    right = tx.T @ y
+#    w = np.linalg.solve(left, right)
+#    loss = compute_mse(y, tx, w)
+#    return w, loss
 
 def sigmoid(t):
     """apply sigmoid function on t."""
@@ -93,7 +102,7 @@ def penalized_logistic_regression(y, tx, w, lambda_):
     num_samples = y.shape[0]
     loss = compute_logistic_loss(y, tx, w) + (lambda_/2) * (w.T @ w)
     gradient = compute_logistic_gradient(y, tx, w) + lambda_ * w
-    print("gradient : ", compute_logistic_gradient(y, tx, w))
+    #print("gradient : ", compute_logistic_gradient(y, tx, w))
     return loss, gradient
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma) :
