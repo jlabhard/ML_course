@@ -1,28 +1,26 @@
-# Useful starting lines
+""" This file contains all function needed for the implementation of the different methods used to build a prediction model. """
 import numpy as np
 import matplotlib.pyplot as plt
 
-def compute_rmse(y, tx, w):
-    return np.sqrt(2*compute_loss_mse(y, tx, w))
-
-''' Calculate the loss using MSE'''
+''' Compute the MSE '''
 def compute_mse(y, tx, w):
     # error
     e = y - tx @ w
     # return the loss
     return (e.T @ e)/(2*len(y))
 
+''' Compute the RMSE '''
 def compute_rmse(y, tx, w):
     return np.sqrt(2*compute_mse(y, tx, w))
 
-''' Compute the gradient of the mse loss'''
+''' Compute the gradient of the MSE loss'''
 def compute_least_square_gradient(y, tx, w):
     # error
     e = y - tx @ w
     # return the gradient
     return (-tx.T @ e)/len(y)
 
-"""Stochastic gradient descent algorithm using mse loss """
+"""Stochastic gradient descent algorithm using MSE loss """
 def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
     """
     Generate a minibatch iterator for a dataset.
@@ -48,24 +46,24 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
         if start_index != end_index:
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
 
+''' Apply sigmoid function on t '''
 def sigmoid(t):
-    """apply sigmoid function on t."""
     return np.where(t >= 0,
                     1 / (1 + np.exp(-t)),
                     np.exp(t) / (1 + np.exp(t)))
 
+''' Compute the logistic loss by negative log likelihood '''
 def compute_logistic_loss(y, tx, w):
-    """compute the cost by negative log likelihood."""
     y = (y+1)/2
     return np.sum(np.log(1 + np.exp(tx @ w)) - y * (tx @ w))
 
+ ''' Compute the gradient of logistic loss '''
 def compute_logistic_gradient(y, tx, w):
-    """compute the gradient of loss."""
     y = (y+1)/2
     return tx.T @ (sigmoid(tx @ w) - y)
 
+''' Return the logistic loss and gradient taking lambda in account '''
 def penalized_logistic_regression(y, tx, w, lambda_):
-    """return the loss and gradient."""
     num_samples = y.shape[0]
     loss = compute_logistic_loss(y, tx, w) + (lambda_/2) * (w.T @ w)
     gradient = compute_logistic_gradient(y, tx, w) + lambda_ * w

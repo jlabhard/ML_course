@@ -1,9 +1,9 @@
-# Useful starting lines
+""" This file contains the 6 different methods seen in class to build our predictive models. """
 import numpy as np
 import matplotlib.pyplot as plt
 from implementation_helper import *
 
-"""Gradient descent algorithm using mse loss """
+''' Gradient descent algorithm using MSE loss  '''
 def least_squares_GD(y, tx, initial_w, max_iters, gamma) :
     w = initial_w
     for n_iter in range(max_iters):
@@ -12,7 +12,7 @@ def least_squares_GD(y, tx, initial_w, max_iters, gamma) :
         w = w - gamma * gradient
     return w, loss
 
-"""Stochastic gradient descent algorithm using mse loss """
+''' Stochastic gradient descent algorithm using MSE loss '''
 def least_squares_SGD(y, tx, initial_w, max_iters, gamma) :
     w = initial_w
     N = len(y)
@@ -23,7 +23,7 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma) :
             w = w - gamma*grad
     return w, loss
 
-"""calculate the least squares solution using normal equation """
+''' Least squares solution using normal equation '''
 def least_squares(y, tx) :
     try :
         w = np.linalg.solve(tx.T @ tx, tx.T @ y)
@@ -33,7 +33,7 @@ def least_squares(y, tx) :
     return w, loss
 
 
-"""implement ridge regression."""
+''' Ridge regression'''
 def ridge_regression(y, tx, lambda_) :
     aI = 2 * tx.shape[0] * lambda_ * np.identity(tx.shape[1])
 
@@ -46,10 +46,8 @@ def ridge_regression(y, tx, lambda_) :
     loss = compute_mse(y, tx, w)
     return w, loss
 
+''' Logistic Regression '''
 def logistic_regression(y, tx, initial_w, max_iters, gamma) :
-    """
-    Gradient descent algorithm.
-    """
     w = initial_w
     for n_iter in range(max_iters):
         loss = compute_logistic_loss(y, tx, w)
@@ -57,10 +55,8 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma) :
         w = w - gamma * grad
     return w, loss
 
+''' Regularized Logistic Regression '''
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma) :
-    """
-    Gradient descent algorithm.
-    """
     w = initial_w
     for n_iter in range(max_iters):
         loss, gradient = penalized_logistic_regression(y, tx, w, lambda_)

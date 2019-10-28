@@ -1,10 +1,10 @@
+""" This file contains all methods used to build and analyze efficiency of a model"""
 import numpy as np
 import matplotlib.pyplot as plt
 from proj1_helpers import *
 
-
+''' Splits the dataset based on the split ratio '''
 def split_data(x, y, ratio, seed):
-    """split the dataset based on the split ratio."""
     # set seed
     np.random.seed(seed)
     temp = list(zip(x,y))
@@ -16,22 +16,10 @@ def split_data(x, y, ratio, seed):
 
     return x_split[0], x_split[1], y_split[0], y_split[1]
 
-def build_poly(x, degree):
-    """polynomial basis functions for input data x, for j=0 up to j=degree."""
-    poly = np.zeros((degree+1, len(x)))
-    for deg in range(degree+1):
-        y = np.power(x,deg)
-        poly[deg] = y
-    return poly.T
-
+'''
+Plots the accuracy values on train and test set depending on a certain hyper-parameter given in x_axis
+'''
 def plot_train_test(train_accuracy, test_accuracy, x_axis, title_, p, log = False):
-    """
-    train_errors, test_errors should be list (of the same size) the respective train error and test error ,
-    * train_errors[0] = RMSE of a ridge regression on the train set
-    * test_errors[0] = RMSE of the parameter found by ridge regression applied on the test set
-
-    degree is just used for the title of the plot.
-    """
     if log :
         plt.semilogx(x_axis, train_accuracy, color='b', marker='*', label="Train accuracy")
         plt.semilogx(x_axis, test_accuracy, color='r', marker='*', label="Test accuracy")
@@ -45,13 +33,13 @@ def plot_train_test(train_accuracy, test_accuracy, x_axis, title_, p, log = Fals
     leg.draw_frame(False)
     plt.show()
 
-
+''' Build polynomial expansion of a single dimension array'''
 def build_poly(x, degree):
-    """polynomial basis functions for input data x, for j=0 up to j=degree."""
     phi = np.array([x,]*(degree+1)).transpose()
     powers = np.tile(range(degree+1), (len(x), 1))
     return phi**powers
 
+''' Build polynomial expansion of each columns of a matrix ond combines them'''
 def build_multi_poly(X, degree) :
     poly = np.ones(X.shape[0])
     for i in range(X.shape[1]) :
@@ -76,24 +64,6 @@ def other_partition(arr):
     arr = correct_partition(arr)
     return [ans for ans in arr if (ans[0] == 0 or ans[1] == 0) ]
 
-
-# def build_augmented_features(feature_1, feature_2, degree=2, cross= True):
-#     degree_array = []
-#     if cross:
-#         for i in range(degree):
-#             degree_array.append(correct_partition(partition(i+1)))
-#     else:
-#         for i in range(degree):
-#             degree_array.append(other_partition(partition(i+1)))
-
-#     degree_array = [item for sublist in degree_array for item in sublist]
-#     augmented_array = np.zeros((feature_1.shape[0], len(degree_array)))
-
-#     for i, tuple_ in enumerate(degree_array):
-#         augmented_array[:, i] = (feature_1 * tuple_[0]) * (feature_2 * tuple_[1])
-
-#     return augmented_array
-
 def build_augmented_features(feature_1, feature_2, degree=2, cross= True):
     degree_array = []
     if cross:
@@ -113,6 +83,7 @@ def build_augmented_features(feature_1, feature_2, degree=2, cross= True):
     augmented_array = (augmented_feat_1 * degree_feat_1) * (augmented_feat_2 * degree_feat_2)
     return augmented_array
 
+''' Build polynomial expansion of a matrix by combining its columns'''
 def build_all(dataset, degree, cross = True):
     augs = []
     for pair in get_combinations(np.arange(dataset.shape[1])):
@@ -129,6 +100,7 @@ def get_combinations(arr):
             my_combinations.append((arr[i], arr[i+j+1]))
     return my_combinations
 
+''' Compute the masks containing the index of elements corresponding to a certain category of elements. '''
 def build_mask(tx) :
     mask1 = tx[:, 0] == -999
     mask2 = (tx[:, 23] == -999) & (tx[:, 0] != -999)
@@ -137,6 +109,7 @@ def build_mask(tx) :
 
     return mask1, mask2, mask3, mask4
 
+''' Returns a subsample of an array given a mask '''
 def build_subsample(tx, mask) :
     feature_mask = []
     for j in range(tx.shape[1]):
@@ -151,6 +124,8 @@ def build_subsample(tx, mask) :
 
     return subsample
 
+''' Split the array in its 4 respective categories. Returns each of the subsamples as well as the mask of each sample for future use'''
+
 def split_categories(tx) :
     m1, m2, m3, m4  = build_mask(tx)
 
@@ -161,17 +136,15 @@ def split_categories(tx) :
 
     return s1, s2, s3, s4, m1, m2, m3, m4
 
-#normalize the matrix
+''' Normalizes the train array and apply the same modification to the test array for compatibility. '''
 def normalize(tx, tx_test) :
     tx_normalized = tx.copy()
     tx_test_normalized = tx_test.copy()
     for index, feature in enumerate(tx_normalized.T) :
         diff = np.amax(feature) - np.amin(feature)
-        normalized_feature = (feature - np.amin(feature))/diff
-        normalized_test_feature = (tx_test_normalized.T[index] - np.amin(feature))/diff
-        #standardized_test_feature = (tx_test_normalized.T[index]-feature.mean())/feature.std()
-        #standardized_feature = (feature-feature.mean())/feature.std()
-        if ((diff != 0) & (diff != 1)) : #avoids normalizing categorical features resulting in singular matrices
+        normalized_feature = (feature - np.amin(feature))/diff # Normalization operation: (x - min) / (max - min)
+        normalized_test_feature = (tx_test_normalized.T[index] - np.amin(feature))/diff # Apply the same modification to the test array
+        if ((diff != 0) & (diff != 1)) : # Avoid normalizing categorical features resulting in singular matrices
             feature[:] = normalized_feature
             tx_test_normalized.T[index, :] = normalized_test_feature
     return tx_normalized, tx_test_normalized
