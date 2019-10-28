@@ -57,7 +57,7 @@ def compute_logistic_loss(y, tx, w):
     y = (y+1)/2
     return np.sum(np.log(1 + np.exp(tx @ w)) - y * (tx @ w))
 
- ''' Compute the gradient of logistic loss '''
+''' Compute the gradient of logistic loss '''
 def compute_logistic_gradient(y, tx, w):
     y = (y+1)/2
     return tx.T @ (sigmoid(tx @ w) - y)
