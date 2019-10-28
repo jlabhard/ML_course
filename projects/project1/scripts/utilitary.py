@@ -1,3 +1,8 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from proj1_helpers import *
+
+
 def split_data(x, y, ratio, seed):
     """split the dataset based on the split ratio."""
     # set seed
@@ -8,7 +13,7 @@ def split_data(x, y, ratio, seed):
     threshold = int(len(x)*ratio)
     x_split = np.split(x, [threshold, len(x)])
     y_split = np.split(y, [threshold, len(y)])
-    
+
     return x_split[0], x_split[1], y_split[0], y_split[1]
 
 def build_poly(x, degree):
@@ -24,7 +29,7 @@ def plot_train_test(train_accuracy, test_accuracy, x_axis, title_, p, log = Fals
     train_errors, test_errors should be list (of the same size) the respective train error and test error ,
     * train_errors[0] = RMSE of a ridge regression on the train set
     * test_errors[0] = RMSE of the parameter found by ridge regression applied on the test set
-    
+
     degree is just used for the title of the plot.
     """
     if log :
@@ -39,8 +44,8 @@ def plot_train_test(train_accuracy, test_accuracy, x_axis, title_, p, log = Fals
     leg = plt.legend(loc=1, shadow=True)
     leg.draw_frame(False)
     plt.show()
-    
-    
+
+
 def build_poly(x, degree):
     """polynomial basis functions for input data x, for j=0 up to j=degree."""
     phi = np.array([x,]*(degree+1)).transpose()
@@ -61,15 +66,15 @@ def partition(number):
     for x in range(1, number):
         for y in partition(number - x):
             answer.append((x,  ) + y)
-    answer = [ans for ans in answer if len(ans) <3] 
+    answer = [ans for ans in answer if len(ans) <3]
     return answer
 
 def correct_partition(arr):
-    return [ans for ans in arr if len(ans) != 1  ] 
+    return [ans for ans in arr if len(ans) != 1  ]
 
 def other_partition(arr):
     arr = correct_partition(arr)
-    return [ans for ans in arr if (ans[0] == 0 or ans[1] == 0) ] 
+    return [ans for ans in arr if (ans[0] == 0 or ans[1] == 0) ]
 
 
 # def build_augmented_features(feature_1, feature_2, degree=2, cross= True):
@@ -80,7 +85,7 @@ def other_partition(arr):
 #     else:
 #         for i in range(degree):
 #             degree_array.append(other_partition(partition(i+1)))
-            
+
 #     degree_array = [item for sublist in degree_array for item in sublist]
 #     augmented_array = np.zeros((feature_1.shape[0], len(degree_array)))
 
@@ -97,9 +102,9 @@ def build_augmented_features(feature_1, feature_2, degree=2, cross= True):
     else:
         for i in range(degree):
             degree_array.append(other_partition(partition(i+1)))
-            
+
     degree_array = [item for sublist in degree_array for item in sublist]
-    
+
     augmented_feat_1 = np.tile(feature_1, (len(degree_array), 1)).T
     augmented_feat_2 = np.tile(feature_2, (len(degree_array), 1)).T
     degree_feat_1 = np.tile(np.array([item[0] for item in degree_array]), (feature_1.shape[0], 1))
@@ -124,12 +129,12 @@ def get_combinations(arr):
             my_combinations.append((arr[i], arr[i+j+1]))
     return my_combinations
 
-def build_mask(tx) : 
+def build_mask(tx) :
     mask1 = tx[:, 0] == -999
     mask2 = (tx[:, 23] == -999) & (tx[:, 0] != -999)
     mask3 = (tx[:, 4] == -999) & (tx[:, 23] != -999) & (tx[:, 0] != -999)
     mask4 = (tx[:, 4] != -999) & (tx[:, 23] != -999) & (tx[:, 0] != -999)
-    
+
     return mask1, mask2, mask3, mask4
 
 def build_subsample(tx, mask) :
@@ -141,19 +146,19 @@ def build_subsample(tx, mask) :
             feature_mask.append(not ((0 in tx[mask][:,j])))
         else :
             feature_mask.append(not (-999 in tx[mask][:,j]))
-        
+
     subsample = tx[mask][:, feature_mask]
-    
+
     return subsample
-        
+
 def split_categories(tx) :
     m1, m2, m3, m4  = build_mask(tx)
-    
+
     s1 = build_subsample(tx, m1)
     s2 = build_subsample(tx, m2)
     s3 = build_subsample(tx, m3)
     s4 = build_subsample(tx, m4)
-    
+
     return s1, s2, s3, s4, m1, m2, m3, m4
 
 #normalize the matrix
@@ -184,15 +189,6 @@ def total_accuracy(weights, x, y, masks) :
         total_count += np.count_nonzero(y[masks[i]] == y_pred)
     return total_count / (y.shape[0])
 
-''' Create a dictionary which enable to compute the different methods in a modularized way '''
-methods = {
-    "least_squares_GD" : (lambda y, tx, lambda_, initial_w, max_iters, gamma: least_squares_GD(y, tx, initial_w, max_iters, gamma)),
-    "least_squares_SGD" : (lambda y, tx, lambda_, initial_w, max_iters, gamma: least_squares_SGD(y, tx, initial_w, max_iters, gamma)),
-    "least_squares": (lambda y, tx, lambda_, initial_w, max_iters, gamma: least_squares(y, tx)),
-    "ridge_regression" : (lambda y, tx, lambda_, initial_w, max_iters, gamma: ridge_regression(y, tx, lambda_)),
-    "logistic_regression" : (lambda y, tx, lambda_, initial_w, max_iters, gamma: logistic_regression(y, tx, initial_w, max_iters, gamma)),
-    "reg_logistic_regression" : (lambda y, tx, lambda_, initial_w, max_iters, gamma: reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma))   
-}
 
 """ Build k indices for k-fold """
 def build_k_indices(y, k_fold, seed):
@@ -206,23 +202,23 @@ def build_k_indices(y, k_fold, seed):
     return np.array(k_indices)
 
 
-''' 
+'''
 Doing k-fold cross validation for the parameter(s) entered.
 Return the average accuracy obtained for the training and testing set
 '''
 def cross_validation(k_fold, method, y, tx_poly, lambda_ = 0, max_iters = 1, gamma = 0, cross = False):
-    
+
     # define lists to store the accuracy of training data and test data for the given parameter
     acc_tr_param = []
     acc_te_param = []
-    
+
     # split data in k fold
     k_indices = build_k_indices(y, k_fold, seed = 2)
 
     initial_w = np.zeros(tx_poly.shape[1])
-    
+
     for k in range(k_fold):
-        
+
         te_indice = k_indices[k]
         tr_indice = np.delete(k_indices, k, 0)
         tr_indice = np.ndarray.flatten(tr_indice)
@@ -231,24 +227,24 @@ def cross_validation(k_fold, method, y, tx_poly, lambda_ = 0, max_iters = 1, gam
         tr_y = y[tr_indice]
         te_x = tx_poly[te_indice]
         te_y = y[te_indice]
-        
+
         # method call
         w, loss = method(tr_y, tr_x, lambda_, initial_w, max_iters, gamma)
 
         acc_tr_param.append(accuracy_function(w, tr_x, tr_y))
         acc_te_param.append(accuracy_function(w, te_x, te_y))
-    
+
     return np.mean(acc_tr_param), np.mean(acc_te_param)
 
 '''
-Determine the optimal parameter(s) for the given method. Putting default values for the different parameters enable 
+Determine the optimal parameter(s) for the given method. Putting default values for the different parameters enable
 to call determine_parameter for every method.
 method is the function that compute the weights and the loss.
-Return the optimal parameters: degree, lambda, gamma (if only a subset of the parameters is used, consider only 
+Return the optimal parameters: degree, lambda, gamma (if only a subset of the parameters is used, consider only
 the wanted parameters and others are just default values)
 '''
 def determine_parameter(method, tx, y, cross, degrees = [1], lambdas = [0], gammas = [0], k_fold = 4, max_iters = 1, name = 'x'):
-    
+
     # define a matrix to store the accuracy of training data and test data
     acc_tr_matrix = np.zeros(shape = (len(degrees), len(lambdas), len(gammas)))
     acc_te_matrix = np.zeros(shape = (len(degrees), len(lambdas), len(gammas)))
@@ -262,17 +258,17 @@ def determine_parameter(method, tx, y, cross, degrees = [1], lambdas = [0], gamm
         for i, lambda_ in enumerate(lambdas) :
             for j, gamma in enumerate(gammas) :
                 acc_tr_matrix[h, i, j], acc_te_matrix[h, i, j] = cross_validation(k_fold, method, y, tx_poly, lambda_ = lambda_, max_iters = max_iters, gamma = gamma, cross = cross)
-    
+
     # find the indices of the maximum accuracy in 'acc_te_matrix'
     max_acc_index = np.unravel_index(acc_te_matrix.argmax(), acc_te_matrix.shape)
      # maximum accuracy in 'acc_te_matrix'
     max_acc = acc_te_matrix[max_acc_index]
-    
+
     # optimal parameters
     degree = degrees[max_acc_index[0]]
     lambda_ = lambdas[max_acc_index[1]]
     gamma = gammas[max_acc_index[2]]
-    
+
     # Plot only the wanted parameter(s) in function of the accuracy.
     # When plotting a specific parameter others parameters are optimal.
     if len(degrees) > 1:
@@ -294,15 +290,15 @@ def determine_parameter(method, tx, y, cross, degrees = [1], lambdas = [0], gamm
         gammas_plot = plot_train_test(acc_tr_matrix[max_acc_index[0], max_acc_index[1], :], acc_te_matrix[max_acc_index[0], max_acc_index[1], :], gammas, title, 'gamma', log = True)
         print("Optimal gamma :", gamma, '\n')
     print("Max accuracy :", max_acc)
-    
+
     return degree, lambda_, gamma
 
 '''
-Generate the optimal parameters that enable to train the model into the whole dataset and to have the optimal 
+Generate the optimal parameters that enable to train the model into the whole dataset and to have the optimal
 weights.
 X: categorized dataset(X[0] represent the first category)
 
-Return all useful information of the model: optimal weights for each category, dataset 
+Return all useful information of the model: optimal weights for each category, dataset
 matrix with feature expansion for each category, optimal parameters and the accuracy.
 '''
 def analyze_method(method, X, y, masks, degrees = [1], lambdas = [0], gammas = [0], max_iters = 1, k_fold = 4, name = "x", cross = False) :
@@ -311,11 +307,11 @@ def analyze_method(method, X, y, masks, degrees = [1], lambdas = [0], gammas = [
     optimal_gamma = np.zeros(X.shape[0])
     # expansion features of the dataset with the optimal degree.
     X_poly = []
-    # weights 
+    # weights
     W = []
     # loss
     L = []
-    
+
     # for each catagory fill in W and L.
     for i in range(X.shape[0]) :
         temp_name = name + str(i+1)
@@ -328,9 +324,9 @@ def analyze_method(method, X, y, masks, degrees = [1], lambdas = [0], gammas = [
     X_poly = np.array([X_poly[0], X_poly[1], X_poly[2], X_poly[3]])
     W = np.array([W[0], W[1], W[2], W[3]])
     L = np.array([L[0], L[1], L[2], L[3]])
-    
-    
+
+
     accuracy = total_accuracy(W, X_poly, y, masks)
     print("Accuracy with optimal parameters is :", accuracy * 100, '%')
-    
+
     return W, X_poly, optimal_degree, optimal_lambda, optimal_gamma, accuracy

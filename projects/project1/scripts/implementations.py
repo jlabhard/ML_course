@@ -1,7 +1,7 @@
 # Useful starting lines
 import numpy as np
 import matplotlib.pyplot as plt
-from implementation_helper.py import *
+from implementation_helper import *
 
 """Gradient descent algorithm using mse loss """
 def least_squares_GD(y, tx, initial_w, max_iters, gamma) :
@@ -36,7 +36,7 @@ def least_squares(y, tx) :
 """implement ridge regression."""
 def ridge_regression(y, tx, lambda_) :
     aI = 2 * tx.shape[0] * lambda_ * np.identity(tx.shape[1])
-    
+
     try :
         w = np.linalg.solve(tx.T @ tx + aI, tx.T @ y)
     except :

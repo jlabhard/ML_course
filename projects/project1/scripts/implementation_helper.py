@@ -1,3 +1,7 @@
+# Useful starting lines
+import numpy as np
+import matplotlib.pyplot as plt
+
 def compute_rmse(y, tx, w):
     return np.sqrt(2*compute_loss_mse(y, tx, w))
 
@@ -46,8 +50,8 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
 
 def sigmoid(t):
     """apply sigmoid function on t."""
-    return np.where(t >= 0, 
-                    1 / (1 + np.exp(-t)), 
+    return np.where(t >= 0,
+                    1 / (1 + np.exp(-t)),
                     np.exp(t) / (1 + np.exp(t)))
 
 def compute_logistic_loss(y, tx, w):
