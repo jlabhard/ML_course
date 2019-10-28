@@ -7,11 +7,11 @@ This folder contains all the files included in our submission of project 1. This
 ### Files description
 #### run.py 
 Run this file to obtain the submission_file we used in the AICrowd competition. 
-### project1.ipynb
+#### project1.ipynb
 Notebook file of the project containing exhaustive explanations of our results. Only run the cell of the model building method of your interest if you wish to get a submission file from it. 
-### utilitary.py
+#### utilitary.py
 File containing all methods used to build and analyze efficiency of a model
-### implementations.py
+#### implementations.py
 File containing the 6 different methods seen in class to build our prediction model
-### implementation_helper.py
+#### implementation_helper.py
 File containing all function needed for the implementation of the different methods used to build a prediction model
